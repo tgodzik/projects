@@ -26,8 +26,11 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.at
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", evaluate)
+#cross - ind1, ind2
 #toolbox.register("mate", tools.cxTwoPoints)
+# mutate with one ind
 #toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+# ind, k <- NGSA, SPEA
 #toolbox.register("select", tools.selTournament, tournsize=3)
 
 population = toolbox.population(n=300)
