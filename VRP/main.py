@@ -1,54 +1,43 @@
 __author__ = 'Tomasz Godzik'
 
 from utils.reader import *
+from utils.evolution import *
 from deap import base
 from deap import creator
 from deap import tools
 
+#read the problem from file
 problem=from_file(["./solomon_25/C101.txt"])[0]
 
+#count the number of customers
 customers_num=len(problem.customers.keys())
 
-# number of vehicles, total distance
+# create fitness and individual
 creator.create("FitnessSolution", base.Fitness, weights=(-1.0, -0.1))
 creator.create("Individual", list, fitness=creator.FitnessSolution)
 
+#create list of all customers
 customer=range(1,customers_num+1)
 
-
+#creating new individuals
 toolbox = base.Toolbox()
 toolbox.register("attr", randomize_list,customer,problem.vehicles)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-ind1 = toolbox.individual()
-ind2 = toolbox.individual()
+toolbox.register("evaluate", evaluate)
+#toolbox.register("mate", tools.cxTwoPoints)
+#toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+#toolbox.register("select", tools.selTournament, tournsize=3)
 
-print ind1
-print ind2
+population = toolbox.population(n=300)
 
-def evaluate_route(route,problem):
-    time=0
-    current_cargo=problem.capacity
-    current_x=problem.depotx
-    current_y=problem.depoty
-    for i in route:
-        #calculate the distance from one customer to another
-        dist=math.sqrt(math.pow(problem.customers[i].x-current_x,2)+math.pow(problem.customers[i].y-current_y,2))
-        current_x=problem.customers[i].x
-        current_y=problem.customers[i].y
-        time+=dist
-        #if we have to wait
-        time=max(time<problem.customers[i].ready, time)
-    return time
+NGEN=40
 
-#wyliczamy wartosc fitness
-def evaluate(individual,problem):
-    a =  len(individual)
-    b=0
-    for i in individual:
-        b+=evaluate_route(i,problem)
-    return a, b
-
-ind1.fitness.values = evaluate(ind1,problem)
-print ind1.fitness.valid
-print ind1.fitness
+#ind1.fitness.values = evaluate(ind1,problem)
+#print ind1.fitness.valid
+#print ind1.fitness
+#
+#ind2.fitness.values = evaluate(ind2,problem)
+#print ind2.fitness.valid
+#print ind2.fitness
