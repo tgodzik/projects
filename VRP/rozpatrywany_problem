@@ -1,0 +1,10 @@
+VRPTW - vehicle routing problem with time windows
+
+The additional goal is to deliver the product between certain time limits.
+
+http://www.bernabe.dorronsoro.es/vrp/
+
+Frameworks to use:
+inspyred 
+deap - try to use the distributed nature of the framework, SPEA 2, NSGA-II?
+
