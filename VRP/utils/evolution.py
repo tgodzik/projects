@@ -3,8 +3,14 @@ __author__ = 'Tomasz Godzik'
 import math
 import random
 
-#what with depo?
-def evaluate_route(route, problem):
+def dist(x1, x2, y1, y2):
+    return math.sqrt(
+        math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
+
+#calculate a time cost of a route
+def evaluate_route(route, problem,penalty=True):
+    #total distance
+    cost=0
     time = 0
     additional = 0
     current_cargo = problem.capacity
@@ -14,14 +20,11 @@ def evaluate_route(route, problem):
         #check if we have enough cargo (check if possible - multiple goes?)
         if current_cargo > problem.customers[i].demand:
             #calculate the distance from one customer to another
-            time += math.sqrt(
-                math.pow(problem.customers[i].x - current_x, 2) + math.pow(problem.customers[i].y - current_y, 2))
+            time += dist(problem.customers[i].x, current_x, problem.customers[i].y, current_y)
         else:
             # cost of going back to customer
-            time += math.sqrt(math.pow(problem.depotx - current_x, 2) + math.pow(problem.depoty - current_y, 2))
-            time += math.sqrt(
-                math.pow(problem.customers[i].x - problem.depotx, 2) + math.pow(problem.customers[i].y - problem.depoty,
-                    2))
+            time += dist(problem.depotx, current_x, problem.depoty, current_y)
+            time += dist(problem.customers[i].x, problem.depotx, problem.customers[i].y, problem.depoty)
             current_cargo = problem.capacity
 
         #drop cargo
@@ -40,16 +43,57 @@ def evaluate_route(route, problem):
         #time it takes to drop it
         time += problem.customers[i].service
 
-    return time + additional
+    time+= dist(current_x, problem.depotx, current_y, problem.depoty)
+    if penalty:
+        return time + additional
+    else:
+        return time
 
-#wyliczamy wartosc fitness
-def evaluate(individual, problem):
-    a = len(individual)
+#calculate the total distance traveled on one route
+def total_dist(route, problem):
+    #total distance
+    cost=0
+    current_cargo = problem.capacity
+    current_x = problem.depotx
+    current_y = problem.depoty
+    for i in route:
+        #check if we have enough cargo (check if possible - multiple goes?)
+        if current_cargo > problem.customers[i].demand:
+            #calculate the distance from one customer to another
+            cost += dist(problem.customers[i].x, current_x, problem.customers[i].y, current_y)
+        else:
+            # cost of going back to customer
+            cost += dist(problem.depotx, current_x, problem.depoty, current_y)
+            cost += dist(problem.customers[i].x, problem.depotx, problem.customers[i].y, problem.depoty)
+            current_cargo = problem.capacity
+
+        #drop cargo
+        current_cargo -= problem.customers[i].demand
+
+        #change current location
+        current_x = problem.customers[i].x
+        current_y = problem.customers[i].y
+
+
+    cost+= dist(current_x, problem.depotx, current_y, problem.depoty)
+    return cost
+
+#we calculate the fitness function
+def evaluate(problem, ind):
+    a = len(ind)
     b = 0
-    for i in individual:
-        b += evaluate_route(i, problem)
-    return a, b
+    for i in ind:
+        b += evaluate_route(i,problem)
+    return b,a
 
+
+#we calculate the total distance covered
+def calculate_dist(problem, ind):
+    a = len(ind)
+    b = 0
+    for i in ind:
+        b += total_dist(i,problem)
+    return b,a
 
 def mutate_swap(ind):
     route1 = random.randint(0, len(ind) - 1)
@@ -91,7 +135,7 @@ def mutate_insert(ind, max_vehicles):
     return ind,
 
 
-def mutate_displace(ind,max_vehicles):
+def mutate_displace(ind, max_vehicles):
     route = random.randint(0, len(ind) - 1)
     rfrom = random.randint(0, len(ind[route]) - 1)
     rto = random.randint(rfrom + 1, len(ind[route]))
@@ -103,26 +147,46 @@ def mutate_displace(ind,max_vehicles):
     else:
         new_route = random.randint(0, len(ind) - 1)
         place = random.randint(0, len(ind[new_route]))
-        ind[new_route]=ind[new_route][0:place] + subroute + ind[new_route][place:len(ind[new_route])]
+        ind[new_route] = ind[new_route][0:place] + subroute + ind[new_route][place:len(ind[new_route])]
 
     if len(ind[route]) == 0:
         ind.remove(ind[route])
     return ind,
 
-def mutate(ind,max_v,swap_rate=0.05,inverse_rate=0.1,insert_rate=0.05,displace_rate=0.15):
+
+def mutate(max_v, ind,  swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, displace_rate=0.15):
     if random.random() <= swap_rate:
-        ind,= mutate_swap(ind)
+        ind, = mutate_swap(ind)
     if random.random() <= inverse_rate:
-        ind,= mutate_inverse(ind)
+        ind, = mutate_inverse(ind)
     if random.random() <= insert_rate:
-        ind, = mutate_insert(ind,max_v)
+        ind, = mutate_insert(ind, max_v)
     if random.random() <= displace_rate:
-        ind, = mutate_displace(ind,max_v)
+        ind, = mutate_displace(ind, max_v)
     return ind,
 
-def cross_over(ind1,ind2):
+
+def cross_over( problem,ind1, ind2):
     route = random.randint(0, len(ind1) - 1)
     rfrom = random.randint(0, len(ind1[route]) - 1)
     rto = random.randint(rfrom + 1, len(ind1[route]))
     subroute = ind1[route][rfrom:rto]
-    # insert into the second one
+    whereto = (0, 0)
+    min_dist = dist(problem.customers[ind2[0][0]].x, problem.customers[subroute[0]].x, problem.customers[ind2[0][0]].y,
+        problem.customers[subroute[0]].y)
+    for i in ind2:
+        for j in i:
+            if j in subroute:
+                i.remove(j)
+            else:
+                tmp_dist = dist(problem.customers[j].x, problem.customers[subroute[0]].x, problem.customers[j].y,
+                    problem.customers[subroute[0]].y)
+                if tmp_dist < min_dist:
+                    min_dist = tmp_dist
+                    whereto = (ind2.index(i), i.index(j))
+        if len(i) == 0:
+            ind2.remove(i)
+
+    ind2[whereto[0]] = ind2[whereto[0]][0:whereto[1]] + subroute + ind2[whereto[0]][whereto[1]:len(ind2[whereto[0]])]
+    return ind1,ind2
+

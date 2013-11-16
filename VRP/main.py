@@ -1,10 +1,12 @@
 __author__ = 'Tomasz Godzik'
 
-from utils.reader import *
-from utils.evolution import *
+from utils import  *
 from deap import base
 from deap import creator
 from deap import tools
+from scoop import futures
+import sys
+import time
 
 #read the problem from file
 problem=from_file(["./solomon_25/C101.txt"])[0]
@@ -13,7 +15,7 @@ problem=from_file(["./solomon_25/C101.txt"])[0]
 customers_num=len(problem.customers.keys())
 
 # create fitness and individual
-creator.create("FitnessSolution", base.Fitness, weights=(-1.0, -0.1))
+creator.create("FitnessSolution", base.Fitness, weights=(-0.1, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessSolution)
 
 #create list of all customers
@@ -22,63 +24,80 @@ customer=range(1,customers_num+1)
 
 #creating new individuals
 toolbox = base.Toolbox()
+
+if ("-s" in sys.argv) or ("--scoop" in sys.argv) :
+    toolbox.register("map", futures.map)
+
 toolbox.register("attr", randomize_list,customer,problem.vehicles)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+#Register evaluation function
 toolbox.register("evaluate", evaluate, problem)
-#cross - ind1, ind2
-#toolbox.register("mate", tools.cxTwoPoints)
-# mutate with one ind
+#Register cross function
+toolbox.register("mate", cross_over, problem)
+#Register mutation function
 toolbox.register("mutate", mutate, problem.vehicles)
-# ind, k <- NGSA, SPEA
-#toolbox.register("select", tools.selTournament, tournsize=3)
+#Register selection function
+toolbox.register("select", tools.selNSGA2)
 
-population = toolbox.population(n=300)
+#Main part of program - for scoop
+def main():
+    start_time=time.time()
+    #We create the population
+    pop= toolbox.population(n=300)
 
-NGEN=40
+    #How many turns?
+    NGEN=600
 
-ind1 = toolbox.individual()
+    #evaluate the first population
+    for i in pop:
+        i.fitness.values = evaluate(problem,i)
 
-ind1.fitness.values = evaluate(ind1,problem)
-print ind1.fitness.valid
-print ind1.fitness
-print ind1
-ind2, = mutate(ind1,problem.vehicles)
-ind2.fitness.values = evaluate(ind2,problem)
-print ind2.fitness.valid
-print ind2.fitness
-print ind2
+    # create pareto hall of fame
+    hall=tools.ParetoFront()
 
-#
-#ind2.fitness.values = evaluate(ind2,problem)
-#print ind2.fitness.valid
-#print ind2.fitness
+    #cross possibility
+    crs= 0.3
+    #start simulation
+    for g in range(NGEN):
+        # Select the next generation individuals - half
+        selected = toolbox.select(pop, len(pop)/2)
+        # Clone the selected individuals
+        offspring = map(toolbox.clone, selected)
 
-#for g in range(NGEN):
-#    # Select the next generation individuals
-#    offspring = toolbox.select(pop, len(pop))
-#    # Clone the selected individuals
-#    offspring = map(toolbox.clone, offspring)
-#
-#    # Apply crossover on the offspring
-#    for child1, child2 in zip(offspring[::2], offspring[1::2]):
-#        if random.random() < CXPB:
-#            toolbox.mate(child1, child2)
-#            del child1.fitness.values
-#            del child2.fitness.values
-#
-#    # Apply mutation on the offspring
-#    for mutant in offspring:
-#        if random.random() < MUTPB:
-#            toolbox.mutate(mutant)
-#            del mutant.fitness.values
-#
-#    # Evaluate the individuals with an invalid fitness
-#    invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-#    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-#    for ind, fit in zip(invalid_ind, fitnesses):
-#        ind.fitness.values = fit
-#
-#    # The population is entirely replaced by the offspring
-#    pop[:] = offspring
+        # Apply crossover on the offspring
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if random.random() < crs:
+                toolbox.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
+
+        # Apply mutation on the offspring
+        for mutant in offspring:
+            toolbox.mutate(mutant)
+            del mutant.fitness.values
+
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        # The population is entirely replaced by the offspring and the selected
+        pop[:] = offspring + selected
+        hall.update(offspring)
+
+    print "Execution stopped after : " + str(time.time()-start_time)
+    #Print the hall of fame
+    for i in hall:
+        i.fitness.values=calculate_dist(problem,i)
+        print i.fitness
+        print i
+
+    if ("-d" in sys.argv) or ("--draw" in sys.argv):
+        draw_all(hall,problem)
+
+
+if __name__ == '__main__':
+    main()
