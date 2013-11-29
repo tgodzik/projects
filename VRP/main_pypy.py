@@ -2,12 +2,10 @@ __author__ = 'Tomasz Godzik'
 
 from utils.evolution import *
 from utils.reader import *
-from utils.paint import *
 from deap import base
 from deap import creator
 from deap import tools
 import time
-import sys
 
 #read the problem from file
 problem = from_file(["./solomon_25/C101.txt"])[0]
@@ -47,7 +45,7 @@ def main():
     pop = toolbox.population(n=300)
 
     #How many turns?
-    NGEN = 600
+    ngen = 600
 
     #evaluate the first population
     for i in pop:
@@ -59,7 +57,7 @@ def main():
     #cross possibility
     crs = 0.3
     #start simulation
-    for g in range(NGEN):
+    for g in range(ngen):
         # Select the next generation individuals - half
         selected = toolbox.select(pop, len(pop) / 2)
         # Clone the selected individuals
@@ -93,9 +91,6 @@ def main():
         i.fitness.values = calculate_dist(problem, i)
         print i.fitness
         print i
-
-    if ("-d" in sys.argv) or ("--draw" in sys.argv):
-        draw_all(hall, problem)
 
 
 if __name__ == '__main__':
