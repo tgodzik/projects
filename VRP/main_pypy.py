@@ -6,6 +6,8 @@ from deap import base
 from deap import creator
 from deap import tools
 import time
+import multiprocessing
+import sys
 
 #read the problem from file
 problem = from_file(["./solomon_25/C101.txt"])[0]
@@ -20,9 +22,13 @@ creator.create("Individual", list, fitness=creator.FitnessSolution)
 #create list of all customers
 customer = range(1, customers_num + 1)
 
-
 #creating new individuals
 toolbox = base.Toolbox()
+
+#using multiprocessing
+if ("-m" in sys.argv) or ("--multiprocessing" in sys.argv):
+        pool = multiprocessing.Pool()
+        toolbox.register("map", pool.map)
 
 toolbox.register("attr", randomize_list, customer, problem.vehicles)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr)
@@ -38,11 +44,11 @@ toolbox.register("mutate", mutate, problem.vehicles)
 toolbox.register("select", tools.selNSGA2)
 
 
-#Main part of program - for scoop
+#Main part of program - for multiprocessing
 def main():
     start_time = time.time()
     #We create the population
-    pop = toolbox.population(n=300)
+    pop = toolbox.population(n=600)
 
     #How many turns?
     ngen = 600

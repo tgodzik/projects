@@ -8,6 +8,7 @@ from deap import creator
 from deap import tools
 import time
 import sys
+import multiprocessing
 
 #read the problem from file
 problem = from_file(["./solomon_25/C101.txt"])[0]
@@ -22,9 +23,13 @@ creator.create("Individual", list, fitness=creator.FitnessSolution)
 #create list of all customers
 customer = range(1, customers_num + 1)
 
-
 #creating new individuals
 toolbox = base.Toolbox()
+
+#using multiprocessing
+if ("-m" in sys.argv) or ("--multiprocessing" in sys.argv):
+        pool = multiprocessing.Pool(processes=4)
+        toolbox.register("map", pool.map)
 
 toolbox.register("attr", randomize_list, customer, problem.vehicles)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr)
