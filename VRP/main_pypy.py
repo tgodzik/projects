@@ -8,9 +8,12 @@ from deap import tools
 import time
 import multiprocessing
 import sys
+import pickle
 
+#simulation parameters
+instance = "C101.txt"
 #read the problem from file
-problem = from_file(["./solomon_25/C101.txt"])[0]
+problem = from_file(["./solomon_25/" + instance])[0]
 
 #count the number of customers
 customers_num = len(problem.customers.keys())
@@ -97,6 +100,13 @@ def main():
         i.fitness.values = calculate_dist(problem, i)
         print i.fitness
         print i
+
+    if ("-s" in sys.argv) or ("--save" in sys.argv):
+        dump_file = open(instance + ".solution", "wb")
+        pareto_list = []
+        for i in hall:
+            pareto_list.append([j for j in i])
+        pickle.dump(pareto_list, dump_file)
 
 
 if __name__ == '__main__':

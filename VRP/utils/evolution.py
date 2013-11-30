@@ -3,14 +3,15 @@ __author__ = 'Tomasz Godzik'
 import math
 import random
 
+
 def dist(x1, x2, y1, y2):
     return math.sqrt(
         math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
 
 #calculate a time cost of a route
-def evaluate_route(route, problem,penalty=True):
+def evaluate_route(route, problem, penalty=True):
     #total distance
-    cost=0
+    cost = 0
     time = 0
     additional = 0
     current_cargo = problem.capacity
@@ -43,16 +44,17 @@ def evaluate_route(route, problem,penalty=True):
         #time it takes to drop it
         time += problem.customers[i].service
 
-    time+= dist(current_x, problem.depotx, current_y, problem.depoty)
+    time += dist(current_x, problem.depotx, current_y, problem.depoty)
     if penalty:
         return time + additional
     else:
         return time
 
+
 #calculate the total distance traveled on one route
 def total_dist(route, problem):
     #total distance
-    cost=0
+    cost = 0
     current_cargo = problem.capacity
     current_x = problem.depotx
     current_y = problem.depoty
@@ -74,17 +76,17 @@ def total_dist(route, problem):
         current_x = problem.customers[i].x
         current_y = problem.customers[i].y
 
-
-    cost+= dist(current_x, problem.depotx, current_y, problem.depoty)
+    cost += dist(current_x, problem.depotx, current_y, problem.depoty)
     return cost
+
 
 #we calculate the fitness function
 def evaluate(problem, ind):
     a = len(ind)
     b = 0
     for i in ind:
-        b += evaluate_route(i,problem)
-    return b,a
+        b += evaluate_route(i, problem)
+    return b, a
 
 
 #we calculate the total distance covered
@@ -92,8 +94,9 @@ def calculate_dist(problem, ind):
     a = len(ind)
     b = 0
     for i in ind:
-        b += total_dist(i,problem)
-    return b,a
+        b += total_dist(i, problem)
+    return b, a
+
 
 def mutate_swap(ind):
     route1 = random.randint(0, len(ind) - 1)
@@ -154,7 +157,7 @@ def mutate_displace(ind, max_vehicles):
     return ind,
 
 
-def mutate(max_v, ind,  swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, displace_rate=0.15):
+def mutate(max_v, ind, swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, displace_rate=0.15):
     if random.random() <= swap_rate:
         ind, = mutate_swap(ind)
     if random.random() <= inverse_rate:
@@ -166,21 +169,21 @@ def mutate(max_v, ind,  swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, disp
     return ind,
 
 
-def cross_over( problem,ind1, ind2):
+def cross_over(problem, ind1, ind2):
     route = random.randint(0, len(ind1) - 1)
     rfrom = random.randint(0, len(ind1[route]) - 1)
     rto = random.randint(rfrom + 1, len(ind1[route]))
     subroute = ind1[route][rfrom:rto]
     whereto = (0, 0)
     min_dist = dist(problem.customers[ind2[0][0]].x, problem.customers[subroute[0]].x, problem.customers[ind2[0][0]].y,
-        problem.customers[subroute[0]].y)
+                    problem.customers[subroute[0]].y)
     for i in ind2:
         for j in i:
             if j in subroute:
                 i.remove(j)
             else:
                 tmp_dist = dist(problem.customers[j].x, problem.customers[subroute[0]].x, problem.customers[j].y,
-                    problem.customers[subroute[0]].y)
+                                problem.customers[subroute[0]].y)
                 if tmp_dist < min_dist:
                     min_dist = tmp_dist
                     whereto = (ind2.index(i), i.index(j))
@@ -188,5 +191,5 @@ def cross_over( problem,ind1, ind2):
             ind2.remove(i)
 
     ind2[whereto[0]] = ind2[whereto[0]][0:whereto[1]] + subroute + ind2[whereto[0]][whereto[1]:len(ind2[whereto[0]])]
-    return ind1,ind2
+    return ind1, ind2
 

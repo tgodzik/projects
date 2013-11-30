@@ -9,9 +9,12 @@ from deap import tools
 import time
 import sys
 import multiprocessing
+import pickle
 
+#simulation parameters
+instance = "C101.txt"
 #read the problem from file
-problem = from_file(["./solomon_25/C101.txt"])[0]
+problem = from_file(["./solomon_25/" + instance])[0]
 
 #count the number of customers
 customers_num = len(problem.customers.keys())
@@ -52,7 +55,7 @@ def main():
     pop = toolbox.population(n=300)
 
     #How many turns?
-    NGEN = 600
+    ngen = 600
 
     #evaluate the first population
     for i in pop:
@@ -64,7 +67,7 @@ def main():
     #cross possibility
     crs = 0.3
     #start simulation
-    for g in range(NGEN):
+    for g in range(ngen):
         # Select the next generation individuals - half
         selected = toolbox.select(pop, len(pop) / 2)
         # Clone the selected individuals
@@ -101,6 +104,13 @@ def main():
 
     if ("-d" in sys.argv) or ("--draw" in sys.argv):
         draw_all(hall, problem)
+
+    if ("-s" in sys.argv) or ("--save" in sys.argv):
+        dump_file = open(instance + ".solution", "wb")
+        pareto_list = []
+        for i in hall:
+            pareto_list.append([j for j in i])
+        pickle.dump(pareto_list, dump_file)
 
 
 if __name__ == '__main__':
