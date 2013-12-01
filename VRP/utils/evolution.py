@@ -193,3 +193,9 @@ def cross_over(problem, ind1, ind2):
     ind2[whereto[0]] = ind2[whereto[0]][0:whereto[1]] + subroute + ind2[whereto[0]][whereto[1]:len(ind2[whereto[0]])]
     return ind1, ind2
 
+#function to tell apart 2 solutions
+def pareto_similar(ind1, ind2):
+    for i in ind1:
+        if ind2.count(i) == 0:
+            return False
+    return True
