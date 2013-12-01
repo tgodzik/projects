@@ -4,7 +4,7 @@ from utils.paint import *
 from utils.reader import *
 import pickle
 
-name = "C101.txt"
+name = "RC207.txt"
 
 file_solution = open(name + ".solution")
 

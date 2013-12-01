@@ -11,16 +11,16 @@ import pickle
 import sys
 
 #simulation parameters
-instance = "C102.txt"
+instance = "RC207.txt"
 start_population = 500
 ngen = 1000
-sim_weights = (-0.01, -1.0)
+sim_weights = (-1.0, -1.0)
 swap_rate = 0.1
 inverse_rate = 0.1
 insert_rate = 0.1
 displace_rate = 0.2
 crs = 0.7
-pop_part = 0.5
+pop_part = 1.0
 function = tools.selNSGA2  # tools.selNSGA2  # tools.selSPEA2
 
 #string that is prined to a file.
