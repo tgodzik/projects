@@ -12,14 +12,23 @@ import pickle
 
 #simulation parameters
 instance = "C101.txt"
+start_population = 600
+ngen = 1000
+sim_weights = (-0.1, -1.0)
+swap_rate = 0.05
+inverse_rate = 0.1
+insert_rate = 0.05
+displace_rate = 0.15
+crs = 0.5
+pop_part = 0.5
 #read the problem from file
-problem = from_file(["./solomon_25/" + instance])[0]
+problem = from_file(["./solomon_50/" + instance])[0]
 
 #count the number of customers
 customers_num = len(problem.customers.keys())
 
 # create fitness and individual
-creator.create("FitnessSolution", base.Fitness, weights=(-0.1, -1.0))
+creator.create("FitnessSolution", base.Fitness, weights=sim_weights)
 creator.create("Individual", list, fitness=creator.FitnessSolution)
 
 #create list of all customers
@@ -51,10 +60,7 @@ toolbox.register("select", tools.selNSGA2)
 def main():
     start_time = time.time()
     #We create the population
-    pop = toolbox.population(n=600)
-
-    #How many turns?
-    ngen = 600
+    pop = toolbox.population(n=start_population)
 
     #evaluate the first population
     for i in pop:
@@ -63,12 +69,10 @@ def main():
     # create pareto hall of fame
     hall = tools.ParetoFront()
 
-    #cross possibility
-    crs = 0.3
     #start simulation
     for g in range(ngen):
-        # Select the next generation individuals - half
-        selected = toolbox.select(pop, len(pop) / 2)
+        # Select individuals for mating
+        selected = toolbox.select(pop, int(len(pop) * pop_part))
         # Clone the selected individuals
         offspring = map(toolbox.clone, selected)
 
@@ -81,7 +85,7 @@ def main():
 
         # Apply mutation on the offspring
         for mutant in offspring:
-            toolbox.mutate(mutant)
+            toolbox.mutate(mutant, swap_rate, inverse_rate, insert_rate, displace_rate)
             del mutant.fitness.values
 
         # Evaluate the individuals with an invalid fitness
@@ -90,8 +94,8 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        # The population is entirely replaced by the offspring and the selected
-        pop[:] = offspring + selected
+        # The population reduced back
+        pop[:] = toolbox.select(pop + offspring, start_population)
         hall.update(offspring)
 
     print "Execution stopped after : " + str(time.time() - start_time)
@@ -99,12 +103,12 @@ def main():
     for i in hall:
         i.fitness.values = calculate_dist(problem, i)
         print i.fitness
-        print i
+        #print i
 
     if ("-s" in sys.argv) or ("--save" in sys.argv):
         dump_file = open(instance + ".solution", "wb")
         pareto_list = []
-        for i in hall:
+        for i in hall:  # also check if valid solution
             pareto_list.append([j for j in i])
         pickle.dump(pareto_list, dump_file)
 

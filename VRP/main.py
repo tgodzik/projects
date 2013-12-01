@@ -13,6 +13,7 @@ import pickle
 
 #simulation parameters
 instance = "C101.txt"
+
 #read the problem from file
 problem = from_file(["./solomon_25/" + instance])[0]
 
@@ -29,7 +30,7 @@ customer = range(1, customers_num + 1)
 #creating new individuals
 toolbox = base.Toolbox()
 
-#using multiprocessing
+#enable multiprocessing
 if ("-m" in sys.argv) or ("--multiprocessing" in sys.argv):
         pool = multiprocessing.Pool(processes=4)
         toolbox.register("map", pool.map)
