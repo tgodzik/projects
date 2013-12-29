@@ -168,7 +168,7 @@ def mutate(max_v, ind, swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, displ
         ind, = mutate_displace(ind, max_v)
     return ind,
 
-
+# czy to dobrze dziala
 def cross_over(problem, ind1, ind2):
     route = random.randint(0, len(ind1) - 1)
     rfrom = random.randint(0, len(ind1[route]) - 1)
