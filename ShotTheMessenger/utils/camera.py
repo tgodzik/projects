@@ -13,3 +13,12 @@ def init_capture(which_camera):
 def init_windows(names):
         for name in names:
             cv2.namedWindow(name, cv2.CV_WINDOW_AUTOSIZE)
+
+
+def show_windows(im, bw):
+    bw = cv2.pyrDown(bw)
+    bw = cv2.pyrDown(bw)
+    sh = bw.shape
+    x = sh[0]
+    y = sh[1]
+    im[0:x,0:y] = bw
