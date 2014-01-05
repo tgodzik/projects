@@ -31,6 +31,34 @@ class Problem:
         return ret
 
 
+def parse_other(lines):
+    problem = Problem()
+    for line in lines:
+        matched = re.findall("[0-9\.]+", line)
+        if len(matched) == 4:
+            problem.name = matched[0]
+            problem.vehicles = int(matched[1])
+        elif len(matched) == 2:
+            problem.capacity = int(matched[1])
+        elif len(matched) > 4:
+            if int(matched[0]) == 0:
+                problem.depotx = float(matched[1])
+                problem.depoty = float(matched[2])
+            else:
+                problem.customers[int(matched[0])] = Customer(float(matched[1]), float(matched[2]), float(matched[4]),
+                                                              int(matched[8]), int(matched[9]), float(matched[3]))
+    return problem
+
+
+def from_file_other(arg_list):
+    return_list = []
+    for name in arg_list:
+        opened_file = open(name)
+        vrp = parse(opened_file.readlines())
+        return_list.append(vrp)
+    return return_list
+
+
 def parse(lines):
     problem = Problem()
     for line in lines:

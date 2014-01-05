@@ -4,12 +4,12 @@ from utils.paint import *
 from utils.reader import *
 import pickle
 
-name = "RC207.txt"
+name = "C101.txt"
 
 file_solution = open(name + ".solution")
 
 hall = pickle.load(file_solution)
 
-problem = from_file(["./solomon_25/" + name])[0]
+problem = from_file(["./solomon/" + name])[0]
 
 draw_all(hall, problem)

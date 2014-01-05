@@ -11,27 +11,27 @@ import pickle
 import sys
 
 #simulation parameters
-instance = "RC207.txt"
-start_population = 500
-ngen = 1000
-sim_weights = (-1.0, -1.0)
-swap_rate = 0.1
-inverse_rate = 0.1
-insert_rate = 0.1
-displace_rate = 0.2
-crs = 0.7
-pop_part = 1.0
-function = tools.selNSGA2  # tools.selNSGA2  # tools.selSPEA2
+instance = "C101.txt"  # R101.txt, RC101.txt
+start_population = 200  # populacja 500
+ngen = 2000  # ngen = 600
+sim_weights = (-1.0, -0.1)  # weights (-1.0, -1.0), (-0.1, -1.0), (-0.01, -1.0)
+swap_rate = 0.5  # 0.1, 0.2
+inverse_rate = 0.5  # 0.1, 0.2
+insert_rate = 0.5  # 0.1, 0.2
+displace_rate = 0.5  # 0.1, 0.2
+crs = 0.7  # 0.5, 0.7, 1.0
+pop_part = 1.0  #
+function = tools.selNSGA2  # tools.selNSGA2
 
 #string that is prined to a file.
-result_string = "%s; %d; %d; %f %f; %f; %f; %f; %f; %f; %f; %s; " % (instance, start_population, ngen,
-                                                                     sim_weights[0], sim_weights[1],
-                                                                     swap_rate, inverse_rate, insert_rate,
-                                                                     displace_rate, crs, pop_part, function.__name__)
+result_string = "%s; %d; %d; %f %f; %f; %f; %f; %f; %f; %s; " % (instance, start_population, ngen,
+                                                                 sim_weights[0], sim_weights[1],
+                                                                 swap_rate, inverse_rate, insert_rate,
+                                                                 displace_rate, crs, function.__name__)
 
 
 #read the problem from file
-problem = from_file(["./solomon_25/" + instance])[0]
+problem = from_file(["./solomon/" + instance])[0]
 
 #count the number of customers
 customers_num = len(problem.customers.keys())
@@ -64,9 +64,10 @@ toolbox.register("mutate", mutate, problem.vehicles)
 #Register selection function
 toolbox.register("select", function)
 
-
+#2001
 #Main part of program - for multiprocessing
 def main():
+    #random.seed(3311)
     start_time = time.time()
 
     #create the population
@@ -112,7 +113,7 @@ def main():
         hall.update(offspring)
 
         #print percentage
-        cur_gen = int(((g+1)/float(ngen))*100)
+        cur_gen = int(((g + 1) / float(ngen)) * 100)
         sys.stdout.write("\r%d%%" % cur_gen)
         sys.stdout.flush()
 
@@ -123,7 +124,8 @@ def main():
     hall_string = ""
     inds_string = ";"
     for i in hall:
-        hall_string += "(d : %f e: %f n: %d)" % (calculate_dist(problem, i)[0], i.fitness.values[0], i.fitness.values[1])
+        hall_string += "(d : %f e: %f n: %d)" % (
+        calculate_dist(problem, i)[0], i.fitness.values[0], i.fitness.values[1])
         inds_string += str(i) + ";"
 
     if ("-s" in sys.argv) or ("--save" in sys.argv):
@@ -133,6 +135,9 @@ def main():
             pareto_list.append([j for j in i])
         pickle.dump(pareto_list, dump_file)
 
+    for i in pop:
+        print calculate_dist(problem, i)[0], i.fitness.values[0], i.fitness.values[1]
+        print str(i) + ";"
     return hall_string + inds_string
 
 
@@ -142,5 +147,5 @@ if __name__ == '__main__':
     result_string += main()
 
     #print result_string
-    results_file.write(result_string + "\n")
-    results_file.close()
+    #results_file.write(result_string + "\n")
+    #results_file.close()

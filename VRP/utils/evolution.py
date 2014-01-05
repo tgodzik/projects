@@ -8,8 +8,9 @@ def dist(x1, x2, y1, y2):
     return math.sqrt(
         math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
 
+
 #calculate a time cost of a route
-def evaluate_route(route, problem, penalty=True):
+def evaluate_route(route, problem, penalty=True, penalty_cost=10000):
     #total distance
     cost = 0
     time = 0
@@ -36,10 +37,10 @@ def evaluate_route(route, problem, penalty=True):
         current_y = problem.customers[i].y
 
         #if we have to wait
-        time = max(time < problem.customers[i].ready, time)
 
+        time = max(problem.customers[i].ready, time)
         #if we are late, add penalty
-        additional += max(0, (time - problem.customers[i].due) * 10)
+        additional += max(0, (time - problem.customers[i].due) * penalty_cost)
 
         #time it takes to drop it
         time += problem.customers[i].service
@@ -157,7 +158,7 @@ def mutate_displace(ind, max_vehicles):
     return ind,
 
 
-def mutate(max_v, ind, swap_rate=0.05, inverse_rate=0.1, insert_rate=0.05, displace_rate=0.15):
+def mutate(max_v, ind, swap_rate=0.1, inverse_rate=0.5, insert_rate=0.1, displace_rate=0.15):
     if random.random() <= swap_rate:
         ind, = mutate_swap(ind)
     if random.random() <= inverse_rate:
