@@ -1,6 +1,7 @@
 import cv2
 from roi import Roi
 import numpy as np
+from gesture import Gesture
 
 
 def markers(img):
@@ -23,13 +24,13 @@ def wait_for_palm_cover(capture):
     sh = im.shape
     cols = sh[0]
     rows = sh[1]
-    roi.append(Roi((cols / 3, rows / 3.0), (cols / 3.0 + square_len, rows / 3.0 + square_len)))
-    roi.append(Roi((cols / 4, rows / 2), (cols / 4 + square_len, rows / 2 + square_len)))
-    roi.append(Roi((cols / 3, rows / 1.5), (cols / 3 + square_len, rows / 1.5 + square_len)))
+    roi.append(Roi((cols / 6, rows / 3), (cols / 6 + square_len, rows / 3 + square_len)))
+    roi.append(Roi((cols / 2, rows / 4), (cols / 2 + square_len, rows / 4 + square_len)))
+    roi.append(Roi((cols / 1.5, rows / 3), (cols / 1.5 + square_len, rows / 3 + square_len)))
     roi.append(Roi((cols / 2, rows / 2), (cols / 2 + square_len, rows / 2 + square_len)))
     roi.append(Roi((cols / 2.5, rows / 2.5), (cols / 2.5 + square_len, rows / 2.5 + square_len)))
-    roi.append(Roi((cols / 2, rows / 1.5), (cols / 2 + square_len, rows / 1.5 + square_len)))
-    roi.append(Roi((cols / 2.5, rows / 1.8), (cols / 2.5 + square_len, rows / 1.8 + square_len)))
+    roi.append(Roi((cols / 1.5, rows / 2), (cols / 1.5 + square_len, rows / 2+ square_len)))
+    roi.append(Roi((cols / 1.8, rows / 2.5), (cols / 1.8 + square_len, rows / 2.5 + square_len)))
     while cv2.waitKey(30) <= 0:
         retval, im = capture.read()
         #im = cv2.flip(im, 1)
@@ -109,39 +110,50 @@ def produce_binaries(image, samples, avg_color):
     return cv2.medianBlur(mask, 7)
 
 
+def draw_contours(image, gesture):
+    to_draw = []
+    for i in gesture.hull_p:
+        to_draw.append(list(i[0]))
+    to_draw = np.array([to_draw])
+    cv2.drawContours(image, to_draw , -1, (255, 0, 0), thickness=2, lineType=8)
+
+
+
 def find_biggest_contour(contours):
     biggest_size = -1
-    biggest_contour = None
-    for c in contours:
-        if len(c) > biggest_size:
-            biggest_size = len(c)
-            biggest_contour = c
+    biggest_contour = -1
+    for i in range(0, len(contours)):
+        if len(contours[i]) > biggest_size:
+            biggest_size = len(contours[i])
+            biggest_contour = i
     return biggest_contour
 
 
-def make_contours(bw):
+def make_contours(bw, image):
     bw = cv2.pyrUp(bw)
     contours, hierarchy = cv2.findContours(bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     biggest = find_biggest_contour(contours)
-    if biggest is not None:
-        bRect = cv2.boundingRect(biggest)
-        hullP = cv2.convexHull(biggest)
-        hullI = cv2.convexHull(biggest, returnPoints=False)
-        hullP = cv2.approxPolyDP(hullP, 18, True)
+    if biggest is not -1:
+        gesture = Gesture()
+        gesture.biggest = biggest
+        gesture.bounding = cv2.boundingRect(contours[biggest])
+        gesture.hull_p = cv2.convexHull(contours[biggest])
+        gesture.hull_i = cv2.convexHull(contours[biggest], returnPoints=False)
+        gesture.hull_p = cv2.approxPolyDP(gesture.hull_p, 18, True)
 
-        if len(biggest) > 3:
-            defects = cv2.convexityDefects(biggest, hullI)
+        if len(contours[biggest]) > 3:
+            defects = cv2.convexityDefects(contours[biggest], gesture.hull_i)
             # TODO hg->eleminateDefects(m);
-        isHand = False #hg->detectIfHand();
+        is_hand = True #hg->detectIfHand();
         #hg->printGestureInfo(m->src);
-        if isHand:
-            pass #hg->getFingerTips(m);
+        if is_hand:
+            draw_contours(image, gesture)
+            #hg->getFingerTips(m);
             #hg->drawFingerTips(m);
-            #myDrawContours(m,hg);
+    return image
 
 
 def simple_diff(image, previous_image, old_diff):
-    import numpy as np
 
     if image is not None and previous_image is not None:
         tmp_image = image.astype(np.int)

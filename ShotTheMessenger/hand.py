@@ -32,10 +32,10 @@ while True:
     imLR = cv2.cvtColor(imLR, cv2.COLOR_BGR2HLS)
     bw = produce_binaries(imLR, len(roi), median_color)
     imLR = cv2.cvtColor(imLR, cv2.COLOR_HLS2BGR)
-    # TODO makeContours
+    im = make_contours(bw, image)
     # TODO getFingerNumber
-    # TODO show
-    cv2.imshow("result", bw)
+    merge_image(im, bw)
+    cv2.imshow("result", im)
     if cv2.waitKey(30) >= 113:
         break
 

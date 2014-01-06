@@ -15,10 +15,11 @@ def init_windows(names):
             cv2.namedWindow(name, cv2.CV_WINDOW_AUTOSIZE)
 
 
-def show_windows(im, bw):
+def merge_image(im, bw):
     bw = cv2.pyrDown(bw)
     bw = cv2.pyrDown(bw)
-    sh = bw.shape
+    newbw = cv2.merge([bw,bw,bw])
+    sh = newbw.shape
     x = sh[0]
     y = sh[1]
-    im[0:x,0:y] = bw
+    im[0:x,0:y] = newbw
