@@ -23,9 +23,12 @@ cv2.destroyWindow("img1")
 init_windows(["result"])
 
 #k = cv2.waitKey(10)
-
+retval, image = capture.read()
+set_mouse(100, 100)
 while True:
+    oldimage = image
     retval, image = capture.read()
+    #to_analize = image/2 + oldimage/2
     #image = cv2.flip(image,1)
     imLR = cv2.pyrDown(image)
     imLR = cv2.blur(imLR, (3, 3))
@@ -33,7 +36,6 @@ while True:
     bw = produce_binaries(imLR, len(roi), median_color)
     imLR = cv2.cvtColor(imLR, cv2.COLOR_HLS2BGR)
     im = make_contours(bw, image)
-    # TODO getFingerNumber
     merge_image(im, bw)
     cv2.imshow("result", im)
     if cv2.waitKey(30) >= 113:

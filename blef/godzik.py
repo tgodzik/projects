@@ -74,39 +74,30 @@ class Player:
         self.name = None
         self.dices = None
         self.my_points = 0
+        self.turn = 0
 
     def setName(self, i):
         """
         We do not count our moves into the trustworthiness
         """
-        self.name = str(i)
+        self.name = i
 
     def start(self, dice):
         self.dices = dice
         self.dices.sort()
 
     def play(self, history):
+        if len(history) == 0:
+            return "1"*(self.turn+4)
         res = Strategy.is_possible(self.dices, history[0][1])
         if not res[0]:
             return "CHECK"
         else:
-            if res[1] < random.random():
+            if res[1] > random.random():
                 return "CHECK"
             else:
                 return Strategy.one_better(history[0][1])
 
     def result(self, points, dices):
-        """
-        Influence on delta (Strategy.delta_base / delta_period):
-        1. The higher the points the more we can risk and the other way?
-        2. Check the trustworthiness of previous player to determine the next delta.
-        3. Maybe influence the leap.
-        """
-        self.my_points += points[self.name]
-
-
-#p1 = Player()
-#p1.setName("1")
-#p1.start([3, 4])
-#
-#print p1.play([(4,"3444")])
+        self.my_points += points[self.name-1]
+        self.turn += 1

@@ -2,6 +2,9 @@ import cv2
 from roi import Roi
 import numpy as np
 from gesture import Gesture
+import math
+from .mouse_movement import move_mouse, click
+counter = 0
 
 
 def markers(img):
@@ -25,12 +28,19 @@ def wait_for_palm_cover(capture):
     cols = sh[0]
     rows = sh[1]
     roi.append(Roi((cols / 6, rows / 3), (cols / 6 + square_len, rows / 3 + square_len)))
-    roi.append(Roi((cols / 2, rows / 4), (cols / 2 + square_len, rows / 4 + square_len)))
-    roi.append(Roi((cols / 1.5, rows / 3), (cols / 1.5 + square_len, rows / 3 + square_len)))
-    roi.append(Roi((cols / 2, rows / 2), (cols / 2 + square_len, rows / 2 + square_len)))
-    roi.append(Roi((cols / 2.5, rows / 2.5), (cols / 2.5 + square_len, rows / 2.5 + square_len)))
-    roi.append(Roi((cols / 1.5, rows / 2), (cols / 1.5 + square_len, rows / 2+ square_len)))
-    roi.append(Roi((cols / 1.8, rows / 2.5), (cols / 1.8 + square_len, rows / 2.5 + square_len)))
+    roi.append(Roi((cols / 3, rows / 4), (cols / 3 + square_len, rows / 4 + square_len)))
+    roi.append(Roi((cols / 2.5, rows / 3), (cols / 2.5 + square_len, rows / 3 + square_len)))
+    roi.append(Roi((cols / 4, rows / 3), (cols / 4 + square_len, rows / 3 + square_len)))
+    roi.append(Roi((cols / 3.5, rows / 2.5), (cols / 3.5 + square_len, rows / 2.5 + square_len)))
+    roi.append(Roi((cols / 4.5, rows / 4), (cols / 4.5 + square_len, rows / 4 + square_len)))
+    roi.append(Roi((cols / 2.8, rows / 2.5), (cols / 2.8 + square_len, rows / 2.5 + square_len)))
+    #roi.append(Roi((cols / 6, rows / 3), (cols / 6 + square_len, rows / 3 + square_len)))
+    #roi.append(Roi((cols / 2, rows / 4), (cols / 2 + square_len, rows / 4 + square_len)))
+    #roi.append(Roi((cols / 1.5, rows / 3), (cols / 1.5 + square_len, rows / 3 + square_len)))
+    #roi.append(Roi((cols / 2, rows / 2), (cols / 2 + square_len, rows / 2 + square_len)))
+    #roi.append(Roi((cols / 2.5, rows / 2.5), (cols / 2.5 + square_len, rows / 2.5 + square_len)))
+    #roi.append(Roi((cols / 1.5, rows / 2), (cols / 1.5 + square_len, rows / 2+ square_len)))
+    #roi.append(Roi((cols / 1.8, rows / 2.5), (cols / 1.8 + square_len, rows / 2.5 + square_len)))
     while cv2.waitKey(30) <= 0:
         retval, im = capture.read()
         #im = cv2.flip(im, 1)
@@ -135,6 +145,7 @@ def make_contours(bw, image):
     biggest = find_biggest_contour(contours)
     if biggest is not -1:
         gesture = Gesture()
+        gesture.contours = contours
         gesture.biggest = biggest
         gesture.bounding = cv2.boundingRect(contours[biggest])
         gesture.hull_p = cv2.convexHull(contours[biggest])
@@ -142,28 +153,42 @@ def make_contours(bw, image):
         gesture.hull_p = cv2.approxPolyDP(gesture.hull_p, 18, True)
 
         if len(contours[biggest]) > 3:
-            defects = cv2.convexityDefects(contours[biggest], gesture.hull_i)
-            # TODO hg->eleminateDefects(m);
-        is_hand = True #hg->detectIfHand();
-        #hg->printGestureInfo(m->src);
+            gesture.defects = cv2.convexityDefects(contours[biggest], gesture.hull_i)
+            gesture.check_convexity(image)
+        is_hand = gesture.is_hand()
+
         if is_hand:
+            global counter, mousi
+            if len(gesture.defects) < 5:
+                counter += 1
+            #else: counter =0
+            if counter > 10:
+                print "click"
+                #click()
+                counter = 0
+            sh = bw.shape
+            width = sh[0]
+            height = sh[1]
+            # need different
+            centerx = math.fabs(gesture.bounding[0] + gesture.bounding[2])/2
+            centery = math.fabs(gesture.bounding[1] + gesture.bounding[3])/2
+            move_mouse(centery, centerx, height, width)
+
             draw_contours(image, gesture)
-            #hg->getFingerTips(m);
-            #hg->drawFingerTips(m);
     return image
 
 
-def simple_diff(image, previous_image, old_diff):
-
-    if image is not None and previous_image is not None:
-        tmp_image = image.astype(np.int)
-        tmp_previous_image = previous_image.astype(np.int)
-        diff = np.abs(tmp_image - tmp_previous_image)
-        diff = diff.astype(np.uint8)
-        diff = cv2.medianBlur(src=diff, ksize=11)
-        diff = cv2.inRange(diff, np.array([20.0, 20.0, 20.0]), np.array([255.0, 255.0, 255.0]))
-        measure = diff.sum() / (3 * 255.0)
-        if measure > 500.0:
-            return diff
-        else:
-            return old_diff
+#def simple_diff(image, previous_image, old_diff):
+#
+#    if image is not None and previous_image is not None:
+#        tmp_image = image.astype(np.int)
+#        tmp_previous_image = previous_image.astype(np.int)
+#        diff = np.abs(tmp_image - tmp_previous_image)
+#        diff = diff.astype(np.uint8)
+#        diff = cv2.medianBlur(src=diff, ksize=11)
+#        diff = cv2.inRange(diff, np.array([20.0, 20.0, 20.0]), np.array([255.0, 255.0, 255.0]))
+#        measure = diff.sum() / (3 * 255.0)
+#        if measure > 500.0:
+#            return diff
+#        else:
+#            return old_diff
