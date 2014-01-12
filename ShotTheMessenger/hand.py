@@ -16,7 +16,7 @@ capture = init_capture(1)
 init_windows(["img1"])
 roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)
-
+# Get also size
 print median_color
 cv2.destroyWindow("img1")
 
@@ -24,7 +24,7 @@ init_windows(["result"])
 
 #k = cv2.waitKey(10)
 retval, image = capture.read()
-set_mouse(100, 100)
+#set_mouse(100, 100)
 while True:
     oldimage = image
     retval, image = capture.read()

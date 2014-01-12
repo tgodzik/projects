@@ -1,4 +1,4 @@
-import math
+import math, cv2
 
 
 def distance(point1, point2):
@@ -42,3 +42,7 @@ class Gesture:
         elif h/w > 4 or w/h > 4:
             hand = False
         return hand
+
+    def get_center(self):
+        p = cv2.moments(self.contours[self.biggest], binaryImage=True)
+        return p["m10"]/p["m00"], p["m01"]/p["m00"]

@@ -112,6 +112,8 @@ def produce_binaries(image, samples, avg_color):
                                 min(255, avg_color[i][1] + upper[i][1]), min(255, avg_color[i][2] + upper[i][2])])
         #print "lower : ", lower_bound
         #print "upper :", upper_bound
+        #lower_bound = (0, 0, 0)
+        #upper_bound = (30, 30, 30)
         masks.append(cv2.inRange(image, lower_bound, upper_bound))
         #markers(image)
     mask = masks[0]
@@ -125,7 +127,7 @@ def draw_contours(image, gesture):
     for i in gesture.hull_p:
         to_draw.append(list(i[0]))
     to_draw = np.array([to_draw])
-    cv2.drawContours(image, to_draw , -1, (255, 0, 0), thickness=2, lineType=8)
+    cv2.drawContours(image, to_draw, -1, (255, 0, 0), thickness=2, lineType=8)
 
 
 
@@ -172,7 +174,7 @@ def make_contours(bw, image):
             # need different
             centerx = math.fabs(gesture.bounding[0] + gesture.bounding[2])/2
             centery = math.fabs(gesture.bounding[1] + gesture.bounding[3])/2
-            move_mouse(centery, centerx, height, width)
+            move_mouse(gesture.get_center(), height, width)
 
             draw_contours(image, gesture)
     return image
