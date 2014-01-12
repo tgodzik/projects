@@ -7,6 +7,8 @@ __author__ = 'Tomasz Godzik'
 '''
 import cv2
 from utils import *
+from interface import *
+import pygame
 
 #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9), (4, 4))
 
@@ -14,6 +16,8 @@ capture = init_capture(1)
 
 # try to measure the colors for the hand
 init_windows(["img1"])
+window = ButtonWindow((1680, 1050))
+window.do()
 roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)
 # Get also size
@@ -25,6 +29,7 @@ init_windows(["result"])
 #k = cv2.waitKey(10)
 retval, image = capture.read()
 #set_mouse(100, 100)
+
 while True:
     oldimage = image
     retval, image = capture.read()
@@ -38,8 +43,11 @@ while True:
     im = make_contours(bw, image)
     merge_image(im, bw)
     cv2.imshow("result", im)
+    window.do()
     if cv2.waitKey(30) >= 113:
+        pygame.quit()
         break
+
 
 cv2.destroyAllWindows()
 capture.release()

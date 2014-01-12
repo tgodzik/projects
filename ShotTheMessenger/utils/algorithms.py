@@ -7,18 +7,6 @@ from .mouse_movement import move_mouse, click
 counter = 0
 
 
-def markers(img):
-    cols = len(img)
-    rows = len(img[0])
-    print img[cols / 3, rows / 6]
-    print img[cols / 4, rows / 2]
-    print img[cols / 3, rows / 1.5]
-    print img[cols / 2, rows / 2]
-    print img[cols / 2.5, rows / 2.5]
-    print img[cols / 2, rows / 1.5]
-    print img[cols / 2, rows / 1.8]
-
-
 def wait_for_palm_cover(capture):
     retval, im = capture.read()
     square_len = 20
@@ -34,13 +22,6 @@ def wait_for_palm_cover(capture):
     roi.append(Roi((cols / 3.5, rows / 2.5), (cols / 3.5 + square_len, rows / 2.5 + square_len)))
     roi.append(Roi((cols / 4.5, rows / 4), (cols / 4.5 + square_len, rows / 4 + square_len)))
     roi.append(Roi((cols / 2.8, rows / 2.5), (cols / 2.8 + square_len, rows / 2.5 + square_len)))
-    #roi.append(Roi((cols / 6, rows / 3), (cols / 6 + square_len, rows / 3 + square_len)))
-    #roi.append(Roi((cols / 2, rows / 4), (cols / 2 + square_len, rows / 4 + square_len)))
-    #roi.append(Roi((cols / 1.5, rows / 3), (cols / 1.5 + square_len, rows / 3 + square_len)))
-    #roi.append(Roi((cols / 2, rows / 2), (cols / 2 + square_len, rows / 2 + square_len)))
-    #roi.append(Roi((cols / 2.5, rows / 2.5), (cols / 2.5 + square_len, rows / 2.5 + square_len)))
-    #roi.append(Roi((cols / 1.5, rows / 2), (cols / 1.5 + square_len, rows / 2+ square_len)))
-    #roi.append(Roi((cols / 1.8, rows / 2.5), (cols / 1.8 + square_len, rows / 2.5 + square_len)))
     while cv2.waitKey(30) <= 0:
         retval, im = capture.read()
         #im = cv2.flip(im, 1)
@@ -165,8 +146,7 @@ def make_contours(bw, image):
                 counter += 1
             #else: counter =0
             if counter > 10:
-                print "click"
-                #click()
+                click()
                 counter = 0
             sh = bw.shape
             width = sh[0]
