@@ -169,6 +169,6 @@ class Player:
         next_turn = Strategy.one_better(prev_turn)
         next_prob = Strategy.is_possible(dices[next], next_turn, use_delta=False)
         # we lost with the next, is he more cautious?
-        if points[next_player] == 1 and points[self.name-1] == -1 and next_prob < 0.1:
+        if points[next_player] == 1 and points[self.name-1] == -1 and next_prob[1] < 0.1:
             # risk less
             Strategy.cautious()
