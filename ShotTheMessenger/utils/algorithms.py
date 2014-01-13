@@ -148,6 +148,7 @@ def make_contours(bw, image):
             if counter > 10:
                 click()
                 counter = 0
+            print len(gesture.defects)
             sh = bw.shape
             width = sh[0]
             height = sh[1]
