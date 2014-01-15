@@ -24,14 +24,14 @@ class Strategy:
         """
         Increases cautioness level
         """
-        Strategy.delta_base += 0.05
+        Strategy.delta_base += 0.1
 
     @staticmethod
     def risky():
         """
         Makes more risky
         """
-        Strategy.delta_base -= 0.05
+        Strategy.delta_base -= 0.1
 
     @staticmethod
     def one_better(value):
