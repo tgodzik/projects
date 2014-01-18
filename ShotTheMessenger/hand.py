@@ -16,7 +16,7 @@ capture = init_capture(1)
 
 # try to measure the colors for the hand
 init_windows(["img1"])
-window = ButtonWindow((1680, 1050))
+window = ButtonWindow((1200, 900))
 window.do()
 roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)

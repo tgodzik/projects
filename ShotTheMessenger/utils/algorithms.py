@@ -4,7 +4,9 @@ import numpy as np
 from gesture import Gesture
 import math
 from .mouse_movement import move_mouse, click
+
 counter = 0
+clicked = False
 
 
 def wait_for_palm_cover(capture):
@@ -91,8 +93,6 @@ def produce_binaries(image, samples, avg_color):
 
         upper_bound = np.array([min(255, avg_color[i][0] + upper[i][0]),
                                 min(255, avg_color[i][1] + upper[i][1]), min(255, avg_color[i][2] + upper[i][2])])
-        #print "lower : ", lower_bound
-        #print "upper :", upper_bound
         #lower_bound = (0, 0, 0)
         #upper_bound = (30, 30, 30)
         masks.append(cv2.inRange(image, lower_bound, upper_bound))
@@ -109,7 +109,8 @@ def draw_contours(image, gesture):
         to_draw.append(list(i[0]))
     to_draw = np.array([to_draw])
     cv2.drawContours(image, to_draw, -1, (255, 0, 0), thickness=2, lineType=8)
-
+    cv2.rectangle(image, (gesture.bounding[2], gesture.bounding[3]), (gesture.bounding[0], gesture.bounding[1]),
+                  (0, 255, 0), thickness=2, lineType=8)
 
 
 def find_biggest_contour(contours):
@@ -122,6 +123,23 @@ def find_biggest_contour(contours):
     return biggest_contour
 
 
+def bounding_rect(countour):
+    minx = 3000
+    miny = 3000
+    maxx = 0
+    maxy = 0
+    for i in countour:
+        if i[0][0] < minx:
+            minx = i[0][0]
+        if i[0][1] < miny:
+            miny = i[0][1]
+        if i[0][0] > maxx:
+            maxx = i[0][0]
+        if i[0][1] > maxy:
+            maxy = i[0][1]
+    return minx, miny, maxx, maxy
+
+
 def make_contours(bw, image):
     bw = cv2.pyrUp(bw)
     contours, hierarchy = cv2.findContours(bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -130,7 +148,7 @@ def make_contours(bw, image):
         gesture = Gesture()
         gesture.contours = contours
         gesture.biggest = biggest
-        gesture.bounding = cv2.boundingRect(contours[biggest])
+        gesture.bounding = bounding_rect(contours[biggest])
         gesture.hull_p = cv2.convexHull(contours[biggest])
         gesture.hull_i = cv2.convexHull(contours[biggest], returnPoints=False)
         gesture.hull_p = cv2.approxPolyDP(gesture.hull_p, 18, True)
@@ -141,37 +159,41 @@ def make_contours(bw, image):
         is_hand = gesture.is_hand()
 
         if is_hand:
-            global counter, mousi
-            if len(gesture.defects) < 5:
-                counter += 1
-            #else: counter =0
-            if counter > 10:
+            global counter, clicked
+            #abs(gesture.bounding[0] - gesture.bounding[2]), abs(gesture.bounding[1] - gesture.bounding[3])
+            dx = abs(gesture.bounding[0] - gesture.bounding[2])
+            dy = abs(gesture.bounding[1] - gesture.bounding[3])
+            print abs(dx - dy)
+            if abs(dx - dy) < 100 and counter == 0:
                 click()
+                print "click"
+                counter += 1
+
+            if abs(dx - dy) < 100:
+                counter += 1
+
+            if counter == 20:
                 counter = 0
-            print len(gesture.defects)
+
             sh = bw.shape
             width = sh[0]
             height = sh[1]
-            # need different
-            centerx = math.fabs(gesture.bounding[0] + gesture.bounding[2])/2
-            centery = math.fabs(gesture.bounding[1] + gesture.bounding[3])/2
             move_mouse(gesture.get_center(), height, width)
-
             draw_contours(image, gesture)
     return image
 
 
-#def simple_diff(image, previous_image, old_diff):
-#
-#    if image is not None and previous_image is not None:
-#        tmp_image = image.astype(np.int)
-#        tmp_previous_image = previous_image.astype(np.int)
-#        diff = np.abs(tmp_image - tmp_previous_image)
-#        diff = diff.astype(np.uint8)
-#        diff = cv2.medianBlur(src=diff, ksize=11)
-#        diff = cv2.inRange(diff, np.array([20.0, 20.0, 20.0]), np.array([255.0, 255.0, 255.0]))
-#        measure = diff.sum() / (3 * 255.0)
-#        if measure > 500.0:
-#            return diff
-#        else:
-#            return old_diff
+    #def simple_diff(image, previous_image, old_diff):
+    #
+    #    if image is not None and previous_image is not None:
+    #        tmp_image = image.astype(np.int)
+    #        tmp_previous_image = previous_image.astype(np.int)
+    #        diff = np.abs(tmp_image - tmp_previous_image)
+    #        diff = diff.astype(np.uint8)
+    #        diff = cv2.medianBlur(src=diff, ksize=11)
+    #        diff = cv2.inRange(diff, np.array([20.0, 20.0, 20.0]), np.array([255.0, 255.0, 255.0]))
+    #        measure = diff.sum() / (3 * 255.0)
+    #        if measure > 500.0:
+    #            return diff
+    #        else:
+    #            return old_diff

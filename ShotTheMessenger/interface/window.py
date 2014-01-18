@@ -32,7 +32,7 @@ class ButtonWindow:
 
     #Update the display and show the button
     def update_display(self):
-        self.screen.fill((30, 144, 255))
+        self.screen.fill((255, 255, 255))
         self.button1.draw()
         self.button2.draw()
         self.button3.draw()
