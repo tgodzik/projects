@@ -164,12 +164,14 @@ def make_contours(bw, image):
             dx = abs(gesture.bounding[0] - gesture.bounding[2])
             dy = abs(gesture.bounding[1] - gesture.bounding[3])
             print abs(dx - dy)
-            if abs(dx - dy) < 100 and counter == 0:
+            print dy * 0.3
+            tresh = dy * 0.3
+            if abs(dx - dy) < tresh and counter == 0:
                 click()
                 print "click"
                 counter += 1
 
-            if abs(dx - dy) < 100:
+            if abs(dx - dy) < tresh:
                 counter += 1
 
             if counter == 20:
