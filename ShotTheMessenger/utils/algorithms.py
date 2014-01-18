@@ -10,10 +10,12 @@ clicked = False
 
 
 def wait_for_palm_cover(capture):
+    """
+    Waiting for a click to gather the colors for hand recogniction
+    """
     retval, im = capture.read()
     square_len = 20
     roi = []
-    #im = cv2.flip(im, 1)
     sh = im.shape
     cols = sh[0]
     rows = sh[1]
@@ -26,7 +28,6 @@ def wait_for_palm_cover(capture):
     roi.append(Roi((cols / 2.8, rows / 2.5), (cols / 2.8 + square_len, rows / 2.5 + square_len)))
     while cv2.waitKey(30) <= 0:
         retval, im = capture.read()
-        #im = cv2.flip(im, 1)
         for j in range(0, len(roi)):
             roi[j].draw_rectangle(im)
 
@@ -35,6 +36,9 @@ def wait_for_palm_cover(capture):
 
 
 def get_median(val):
+    """
+    Get a median from list.
+    """
     size = len(val)
     val.sort()
     if size % 2 == 0:
@@ -46,6 +50,9 @@ def get_median(val):
 
 
 def get_median_color(roi, im):
+    """
+    Get median colors from all the roi.
+    """
     r = roi.get_region(im)
     hm = []
     sm = []
@@ -61,9 +68,11 @@ def get_median_color(roi, im):
 
 
 def average(capture, roi):
+    """
+    Get the average colors for all roi.
+    """
     median_color = []
     retval, im = capture.read()
-    #im = cv2.flip(im, 1)
     im = cv2.cvtColor(im, cv2.COLOR_BGR2HLS)
     for j in range(0, len(roi)):
         median_color.append(get_median_color(roi[j], im))
@@ -76,6 +85,9 @@ def average(capture, roi):
 
 
 def init_boundries(length):
+    """
+    Init the boundry borders.
+    """
     lower = []
     upper = []
     for i in range(0, length):
@@ -85,6 +97,9 @@ def init_boundries(length):
 
 
 def produce_binaries(image, samples, avg_color):
+    """
+    Create the black and white image using the boundries.
+    """
     lower, upper = init_boundries(samples)
     masks = []
     for i in range(0, samples):
@@ -96,7 +111,6 @@ def produce_binaries(image, samples, avg_color):
         #lower_bound = (0, 0, 0)
         #upper_bound = (30, 30, 30)
         masks.append(cv2.inRange(image, lower_bound, upper_bound))
-        #markers(image)
     mask = masks[0]
     for i in range(1, len(masks)):
         mask += masks[i]
@@ -104,6 +118,9 @@ def produce_binaries(image, samples, avg_color):
 
 
 def draw_contours(image, gesture):
+    """
+    Draw contours and bounding rectangle on an image.
+    """
     to_draw = []
     for i in gesture.hull_p:
         to_draw.append(list(i[0]))
@@ -114,6 +131,9 @@ def draw_contours(image, gesture):
 
 
 def find_biggest_contour(contours):
+    """
+    Get the biggest contour id.
+    """
     biggest_size = -1
     biggest_contour = -1
     for i in range(0, len(contours)):
@@ -124,6 +144,9 @@ def find_biggest_contour(contours):
 
 
 def bounding_rect(countour):
+    """
+    Get the bounding rectangle.
+    """
     minx = 3000
     miny = 3000
     maxx = 0
@@ -140,7 +163,10 @@ def bounding_rect(countour):
     return minx, miny, maxx, maxy
 
 
-def make_contours(bw, image):
+def analyse(bw, image):
+    """
+    Main logic.
+    """
     bw = cv2.pyrUp(bw)
     contours, hierarchy = cv2.findContours(bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     biggest = find_biggest_contour(contours)
@@ -155,16 +181,15 @@ def make_contours(bw, image):
 
         if len(contours[biggest]) > 3:
             gesture.defects = cv2.convexityDefects(contours[biggest], gesture.hull_i)
-            gesture.check_convexity(image)
+            gesture.check_convexity()
         is_hand = gesture.is_hand()
 
         if is_hand:
             global counter, clicked
-            #abs(gesture.bounding[0] - gesture.bounding[2]), abs(gesture.bounding[1] - gesture.bounding[3])
             dx = abs(gesture.bounding[0] - gesture.bounding[2])
             dy = abs(gesture.bounding[1] - gesture.bounding[3])
-            print abs(dx - dy)
-            print dy * 0.3
+            #print abs(dx - dy)
+            #print dy * 0.3
             tresh = dy * 0.3
             if abs(dx - dy) < tresh and counter == 0:
                 click()
@@ -183,19 +208,3 @@ def make_contours(bw, image):
             move_mouse(gesture.get_center(), height, width)
             draw_contours(image, gesture)
     return image
-
-
-    #def simple_diff(image, previous_image, old_diff):
-    #
-    #    if image is not None and previous_image is not None:
-    #        tmp_image = image.astype(np.int)
-    #        tmp_previous_image = previous_image.astype(np.int)
-    #        diff = np.abs(tmp_image - tmp_previous_image)
-    #        diff = diff.astype(np.uint8)
-    #        diff = cv2.medianBlur(src=diff, ksize=11)
-    #        diff = cv2.inRange(diff, np.array([20.0, 20.0, 20.0]), np.array([255.0, 255.0, 255.0]))
-    #        measure = diff.sum() / (3 * 255.0)
-    #        if measure > 500.0:
-    #            return diff
-    #        else:
-    #            return old_diff

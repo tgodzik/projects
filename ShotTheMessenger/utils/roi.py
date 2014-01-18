@@ -3,6 +3,10 @@ import numpy
 
 
 class Roi:
+    """
+    Class representing regions of interest.
+    """
+
     def __init__(self, lcorner=(0, 0), ucorner=(0, 0)):
         self.upper_corner = int(ucorner[0]), int(ucorner[1])
         self.lower_corner = int(lcorner[0]), int(lcorner[1])
@@ -10,8 +14,14 @@ class Roi:
         self.border_thickness = 2
 
     def draw_rectangle(self, src):
+        """
+        Draw roi rectangle.
+        """
         cv2.rectangle(src,  (self.upper_corner[1], self.upper_corner[0]), (self.lower_corner[1], self.lower_corner[0]),
                       self.color, self.border_thickness)
 
     def get_region(self, image):
+        """
+        Get the roi on image.
+        """
         return image[self.lower_corner[0]:self.upper_corner[0],self.lower_corner[1]:self.upper_corner[1]]

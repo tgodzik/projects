@@ -3,10 +3,11 @@ import pygame
 from pymouse import PyMouse
 import cv2.cv as cv
 
+# init mouse and kalman filter
 mousi = PyMouse()
 curx = -1
 cury = -1
-# add more in order to reach borders
+
 delta = 100
 res = [1680, 1050]
 max_speed = [30, 30]
@@ -47,9 +48,9 @@ cv.SetIdentity(kalman.error_cov_post, cv.RealScalar(.1))
 
 
 def move_mouse(center, width, height):
-    # max 640
-    #max 480
-
+    """
+    Move mouse to a point with kalman filter and scaling.
+    """
     global curx, cury
     x = center[0]
     y = center[1]
@@ -85,10 +86,16 @@ def move_mouse(center, width, height):
 
 
 def set_mouse(x, y):
+    """
+    Move mouse.
+    """
     mousi.move(x, y)
 
 
 def click():
+    """
+    Click mouse.
+    """
     pygame.event.post(pygame.event.Event(MOUSEBUTTONDOWN))
 
 

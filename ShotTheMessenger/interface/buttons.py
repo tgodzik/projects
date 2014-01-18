@@ -2,6 +2,9 @@ import pygame
 
 
 class Button:
+    """
+    Class representing the button.
+    """
     def __init__(self, surface, color, x, y, length, height, text, text_color=(255, 255, 255), width=0):
         self.surface = surface
         self.color = color
@@ -15,6 +18,9 @@ class Button:
         self.rect = pygame.Rect(self.x, self.y, self.length, self.height)
 
     def write_text(self):
+        """
+        Writes the text on the button.
+        """
         font_size = int(self.length // len(self.text))
         font = pygame.font.SysFont("Calibri", font_size)
         rendered_text = font.render(self.text, 1, self.text_color)
@@ -22,6 +28,9 @@ class Button:
                                           (self.y + self.height / 2) - rendered_text.get_height() / 2))
 
     def draw_button(self):
+        """
+        Draws the button.
+        """
         for i in range(1, 10):
             s = pygame.Surface((self.length + (i * 2), self.height + (i * 2)))
             s.fill(self.color)
@@ -35,11 +44,17 @@ class Button:
         pygame.draw.rect(self.surface, (190, 190, 190), (self.x, self.y, self.length, self.height), 1)
 
     def draw(self):
+        """
+        Draws the button and writes the right text on it.
+        """
         self.draw_button()
         self.write_text()
 
 
     def pressed(self, mouse):
+        """
+        Checks if it was pressed.
+        """
         if mouse[0] > self.rect.topleft[0]:
             if mouse[1] > self.rect.topleft[1]:
                 if mouse[0] < self.rect.bottomright[0]:

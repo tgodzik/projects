@@ -14,6 +14,9 @@ def play(what):
 #Initialize pygame
 
 class ButtonWindow:
+    """
+    The whole sample GUI
+    """
     def __init__(self, resolution):
         self.resolution = resolution
         pygame.init()
@@ -32,6 +35,9 @@ class ButtonWindow:
 
     #Update the display and show the button
     def update_display(self):
+        """
+        Does all the drawing.
+        """
         self.screen.fill((255, 255, 255))
         self.button1.draw()
         self.button2.draw()
@@ -40,6 +46,9 @@ class ButtonWindow:
         pygame.display.flip()
 
     def do(self):
+        """
+        Main loop of the program.
+        """
         self.update_display()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
