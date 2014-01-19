@@ -202,9 +202,11 @@ def analyse(bw, image):
             if counter == 20:
                 counter = 0
 
-            sh = bw.shape
-            width = sh[0]
-            height = sh[1]
-            move_mouse(gesture.get_center(), height, width)
+            if abs(dx - dy) > tresh:
+                sh = bw.shape
+                width = sh[0]
+                height = sh[1]
+                move_mouse(gesture.get_center(), height, width)
+
             draw_contours(image, gesture)
     return image

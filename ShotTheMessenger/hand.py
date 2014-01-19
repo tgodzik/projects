@@ -10,7 +10,6 @@ from utils import *
 from interface import *
 import pygame
 
-#kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9), (4, 4))
 
 capture = init_capture(1)
 
@@ -22,13 +21,15 @@ roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)
 # Get also size
 print median_color
+# median_color = [(167, 145, 16), (128, 151, 10), (120, 154, 5),
+# (164, 141, 21), (173, 147, 38), (145, 144, 11), (161, 137, 25)]
+# median_color = [(13, 143, 23), (160, 149, 8), (120, 153, 9),
+# (158, 148, 10), (8, 128, 46), (144, 141, 14), (139, 139, 16)]
 cv2.destroyWindow("img1")
 
 init_windows(["result"])
 
-#k = cv2.waitKey(10)
 retval, image = capture.read()
-#set_mouse(100, 100)
 
 while True:
     oldimage = image
