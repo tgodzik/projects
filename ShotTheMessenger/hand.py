@@ -15,7 +15,8 @@ capture = init_capture(1)
 
 # try to measure the colors for the hand
 init_windows(["img1"])
-window = ButtonWindow((1200, 900))
+window = ButtonWindow((1200, 700))  # smaller
+#window = ButtonWindow((1200, 900)) # bigger
 window.do()
 roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)
@@ -23,8 +24,8 @@ median_color = average(capture, roi)
 print median_color
 # median_color = [(167, 145, 16), (128, 151, 10), (120, 154, 5),
 # (164, 141, 21), (173, 147, 38), (145, 144, 11), (161, 137, 25)]
-# median_color = [(13, 143, 23), (160, 149, 8), (120, 153, 9),
-# (158, 148, 10), (8, 128, 46), (144, 141, 14), (139, 139, 16)]
+median_color = [(13, 143, 23), (160, 149, 8), (120, 153, 9),
+(158, 148, 10), (8, 128, 46), (144, 141, 14), (139, 139, 16)]
 cv2.destroyWindow("img1")
 
 init_windows(["result"])
@@ -43,7 +44,8 @@ while True:
     imLR = cv2.cvtColor(imLR, cv2.COLOR_HLS2BGR)
     im = analyse(bw, image)
     merge_image(im, bw)
-    cv2.imshow("result", im)
+    # what to show
+    cv2.imshow("result", bw)
     window.do()
     if cv2.waitKey(30) >= 113:
         pygame.quit()

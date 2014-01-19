@@ -9,7 +9,8 @@ curx = -1
 cury = -1
 
 delta = 100
-res = [1680, 1050]
+#res = [1680, 1050]
+res = [1366, 768]
 max_speed = [30, 30]
 min_speed = [10, 10]
 

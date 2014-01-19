@@ -53,6 +53,8 @@ class ButtonWindow:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                exit()
             elif event.type == MOUSEBUTTONDOWN:
                 if self.button1.pressed(pygame.mouse.get_pos()):
                     play('data/b1.wav')()
