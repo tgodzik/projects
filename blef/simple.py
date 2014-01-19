@@ -137,7 +137,7 @@ class Player:
             else:
                 return Strategy.one_better(history[0][1])
 
-    def result(self, points, dices):
+    def result(self, points, dices, history):
         """
         Check how the game went.
         """

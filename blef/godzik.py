@@ -142,11 +142,12 @@ class Player:
             else:
                 return Strategy.one_better(history[0][1])
 
-    def result(self, points, dices):
+    def result(self, points, dices, history):
         """
         Check how the game went.
         """
         # update values
+
         self.turn += 1
         self.my_points += points[self.name-1]
 
@@ -154,6 +155,7 @@ class Player:
         prev_player = self.last[0]-1
         prev_turn = self.last[1]
         prev_prob = Strategy.is_possible(dices[prev_player], prev_turn, use_delta=False)
+
         # we lost with the previous, is he a risk taker and we did not check?
         if points[self.name-1] == -1 and points[prev_player] == 1 and prev_prob[1] > 0.4 and not self.checked:
             # check more often
@@ -167,7 +169,8 @@ class Player:
         # check next player
         next_player = self.name % 4
         next_turn = Strategy.one_better(prev_turn)
-        next_prob = Strategy.is_possible(dices[next], next_turn, use_delta=False)
+        next_prob = Strategy.is_possible(dices[next_player], next_turn, use_delta=False)
+
         # we lost with the next, is he more cautious?
         if points[next_player] == 1 and points[self.name-1] == -1 and next_prob[1] < 0.1:
             # risk less
