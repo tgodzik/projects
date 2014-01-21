@@ -39,7 +39,7 @@ class Strategy:
         The next correct setting.
         """
         dice_list = [s for s in value]
-        for i in range(1, 6):
+        for i in range(5, 0, -1):
             if dice_list.count(str(i)) > 0:
                 dice_list.append(str(i + 1))
                 dice_list.remove(str(i))
@@ -175,3 +175,4 @@ class Player:
         if points[next_player] == 1 and points[self.name-1] == -1 and next_prob[1] < 0.1:
             # risk less
             Strategy.cautious()
+
