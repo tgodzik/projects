@@ -12,13 +12,13 @@ import sys
 
 #simulation parameters
 instance = "C101.txt"  # R101.txt, RC101.txt
-start_population = 200  # populacja 500
-ngen = 2000  # ngen = 600
-sim_weights = (-1.0, -0.1)  # weights (-1.0, -1.0), (-0.1, -1.0), (-0.01, -1.0)
-swap_rate = 0.5  # 0.1, 0.2
-inverse_rate = 0.5  # 0.1, 0.2
-insert_rate = 0.5  # 0.1, 0.2
-displace_rate = 0.5  # 0.1, 0.2
+start_population = 300  # populacja 500
+ngen = 1000  # ngen = 600
+sim_weights = (-0.001, -1.0)  # weights (-1.0, -1.0), (-0.1, -1.0), (-0.01, -1.0)
+swap_rate = 0.15  # 0.1, 0.2
+inverse_rate = 0.15  # 0.1, 0.2
+insert_rate = 0.15  # 0.1, 0.2
+displace_rate = 0.15  # 0.1, 0.2
 crs = 0.7  # 0.5, 0.7, 1.0
 pop_part = 1.0  #
 function = tools.selNSGA2  # tools.selNSGA2
@@ -135,17 +135,13 @@ def main():
             pareto_list.append([j for j in i])
         pickle.dump(pareto_list, dump_file)
 
-    for i in pop:
+    for i in hall:
         print calculate_dist(problem, i)[0], i.fitness.values[0], i.fitness.values[1]
         print str(i) + ";"
     return hall_string + inds_string
 
 
 if __name__ == '__main__':
-    results_file = open("results.csv", "a")
 
-    result_string += main()
+    main()
 
-    #print result_string
-    #results_file.write(result_string + "\n")
-    #results_file.close()

@@ -22,10 +22,8 @@ roi = wait_for_palm_cover(capture)
 median_color = average(capture, roi)
 # Get also size
 print median_color
-# median_color = [(167, 145, 16), (128, 151, 10), (120, 154, 5),
-# (164, 141, 21), (173, 147, 38), (145, 144, 11), (161, 137, 25)]
-median_color = [(13, 143, 23), (160, 149, 8), (120, 153, 9),
-(158, 148, 10), (8, 128, 46), (144, 141, 14), (139, 139, 16)]
+# median_color = [(12, 96, 83), (15, 93, 77), (15, 99, 63), (13, 93, 77), (15, 90, 68), (18, 100, 67), (12, 86, 79)]
+#median_color = [(12, 84, 71), (20, 82, 60), (19, 76, 51), (18, 90, 50), (13, 87, 48), (18, 82, 65), (18, 70, 48)]
 cv2.destroyWindow("img1")
 
 init_windows(["result"])
@@ -45,7 +43,7 @@ while True:
     im = analyse(bw, image)
     merge_image(im, bw)
     # what to show
-    cv2.imshow("result", bw)
+    cv2.imshow("result", im)
     window.do()
     if cv2.waitKey(30) >= 113:
         pygame.quit()
