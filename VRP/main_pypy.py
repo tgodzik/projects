@@ -11,7 +11,7 @@ import pickle
 import sys
 
 #simulation parameters
-instance = "C101.txt"  # R101.txt, RC101.txt
+instance = "RC101.txt"  # R101.txt, RC101.txt, C101.txt
 start_population = 300  # populacja 500
 ngen = 1000  # ngen = 600
 sim_weights = (-0.001, -1.0)  # weights (-1.0, -1.0), (-0.1, -1.0), (-0.01, -1.0)
