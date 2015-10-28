@@ -23,7 +23,7 @@ median_color = average(capture, roi)
 # Get also size
 print median_color
 # median_color = [(12, 96, 83), (15, 93, 77), (15, 99, 63), (13, 93, 77), (15, 90, 68), (18, 100, 67), (12, 86, 79)]
-#median_color = [(12, 84, 71), (20, 82, 60), (19, 76, 51), (18, 90, 50), (13, 87, 48), (18, 82, 65), (18, 70, 48)]
+# median_color = [(12, 84, 71), (20, 82, 60), (19, 76, 51), (18, 90, 50), (13, 87, 48), (18, 82, 65), (18, 70, 48)]
 cv2.destroyWindow("img1")
 
 init_windows(["result"])
