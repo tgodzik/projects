@@ -1,4 +1,4 @@
 projects
 ========
 
-Repository for my minor projects.
+Repository for some minor projects.
